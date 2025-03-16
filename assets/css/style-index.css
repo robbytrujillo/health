@@ -1,0 +1,21 @@
+body {
+    background-color: #f8f9fa;
+}
+.container {
+    margin-top: 50px;
+}
+.card {
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+}
+.search-box {
+    max-width: 400px;
+    margin: auto;
+}
+.qr-code {
+    text-align: center;
+}
+.qr-code img {
+    max-width: 150px;
+    margin-top: 10px;
+}
