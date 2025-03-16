@@ -46,6 +46,7 @@ if (!empty($params)) {
 
 $stmt->execute();
 $result = $stmt->get_result();
+
 ?>
 
 <!DOCTYPE html>
@@ -85,24 +86,31 @@ $result = $stmt->get_result();
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>No</th>
+                <!-- <th>No</th> -->
+                <th>Tanggal Sakit</th>
                 <th>NIS</th>
                 <th>Nama</th>
-                <!-- <th>Jenis Kelamin</th> -->
-                <!-- <th>Alamat</th> -->
                 <th>Kelas</th>
-                <!-- <th>Angkatan</th> -->
+                <!-- <th>Tanggal Sakit</th> -->
+                <th>Tekanan Darah</th>
+                <th>Suhu</th>
+                <th>Keluhan</th>
+                <th>Diagnosa</th>
+                <th>Penanganan</th>
             </tr>
         </thead>
         <tbody>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <tr>
+                    <td><?= date('d F Y', strtotime($row['tanggal_sakit'])); ?></td>
                     <td><?= htmlspecialchars($row['nis']); ?></td>
                     <td><?= htmlspecialchars($row['nama']); ?></td>
-                    <!-- <td><?= htmlspecialchars($row['jk']); ?></td> -->
-                    <!-- <td><?= htmlspecialchars($row['alamat']); ?></td> -->
                     <td><?= htmlspecialchars($row['kelas']); ?></td>
-                    <!-- <td><?= htmlspecialchars($row['angkatan']); ?></td> -->
+                    <td><?= htmlspecialchars($row['tekanan_darah']); ?></td>
+                    <td><?= htmlspecialchars($row['suhu']); ?></td>
+                    <td><?= htmlspecialchars($row['keluhan']); ?></td>
+                    <td><?= htmlspecialchars($row['diagnosa']); ?></td>
+                    <td><?= htmlspecialchars($row['penanganan']); ?></td>
                 </tr>
             <?php endwhile; ?>
         </tbody>
