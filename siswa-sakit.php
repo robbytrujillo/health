@@ -102,7 +102,7 @@ $result = $stmt->get_result();
         <tbody>
             <?php while ($row = $result->fetch_assoc()): ?>
                 <tr>
-                    <td><?= date('d F Y', strtotime($row['tanggal_sakit'])); ?></td>
+                    <td><?= date('d F Y', strtotime($row['tgl_sakit'])); ?></td>
                     <td><?= htmlspecialchars($row['nis']); ?></td>
                     <td><?= htmlspecialchars($row['nama']); ?></td>
                     <td><?= htmlspecialchars($row['kelas']); ?></td>
