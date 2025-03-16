@@ -17,7 +17,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 }
 
 // Hitung total data
-$countQuery = "SELECT COUNT(*) as total FROM tb_siswa $whereClause";
+$countQuery = "SELECT COUNT(*) as total FROM tb_petugas $whereClause";
 $stmt = $conn->prepare($countQuery);
 
 if (!empty($params)) {
@@ -30,7 +30,7 @@ $totalData = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalData / $limit);
 
 // Query untuk mengambil data siswa dengan pagination
-$sql = "SELECT * FROM tb_siswa $whereClause LIMIT ?, ?";
+$sql = "SELECT * FROM tb_petugas $whereClause LIMIT ?, ?";
 $stmt = $conn->prepare($sql);
 
 if (!empty($params)) {
@@ -53,7 +53,7 @@ $result = $stmt->get_result();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Siswa</title>
+    <title>Data Petugas</title>
     <link rel="icon" type="image/x-icon" href="assets/images/ihbs-logo-2.png">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
@@ -63,7 +63,7 @@ $result = $stmt->get_result();
         <img src="assets/images/uks1.png" style="width: 110px;">
         <a href="index.php" class="btn btn-outline-success rounded-pill">🔙 <b>Kembali</b></a>
     </div>
-    <h2 class="text-center">Daftar Siswa</h2>
+    <h2 class="text-center">Daftar Petugas</h2>
 
     <!-- Tombol Kembali -->
     <!-- <a href="index.php" class="btn btn-outline-success mb-3 rounded-pill">🔙 Kembali</a> -->
@@ -72,7 +72,7 @@ $result = $stmt->get_result();
     <div class="d-flex justify-content-end mb-3">
         <form method="GET" class="form-inline">
             <div class="input-group" style="width: 100%;">
-                <input type="text" name="search" class="form-control" placeholder="Cari nama siswa..."
+                <input type="text" name="search" class="form-control" placeholder="Cari nama petugas..."
                     value="<?= isset($_GET['search']) ? $_GET['search'] : '' ?>">
                 <div class="input-group-append">
                     <button type="submit" class="btn btn-outline-success">🔍</button>
@@ -86,11 +86,11 @@ $result = $stmt->get_result();
         <thead>
             <tr>
                 <th>No</th>
-                <th>NIS</th>
+                <th>NIP</th>
                 <th>Nama</th>
-                <!-- <th>Jenis Kelamin</th> -->
-                <!-- <th>Alamat</th> -->
-                <th>Kelas</th>
+                <th>Jabatan</th>
+                <th>No Telepon</th>
+                <!-- <th>Kelas</th> -->
                 <!-- <th>Angkatan</th> -->
             </tr>
         </thead>
@@ -101,11 +101,11 @@ $result = $stmt->get_result();
                 
                 <tr>
                     <td><?= $i++; ?></td>
-                    <td><?= htmlspecialchars($row['nis']); ?></td>
-                    <td><?= htmlspecialchars($row['nama']); ?></td>
-                    <!-- <td><?= htmlspecialchars($row['jk']); ?></td> -->
-                    <!-- <td><?= htmlspecialchars($row['alamat']); ?></td> -->
-                    <td><?= htmlspecialchars($row['kelas']); ?></td>
+                    <td><?= htmlspecialchars($row['nip']); ?></td>
+                    <td><?= htmlspecialchars($row['nama_petugas']); ?></td>
+                    <td><?= htmlspecialchars($row['jabatan']); ?></td>
+                    <td><?= htmlspecialchars($row['no_handphone']); ?></td>
+                    <!-- <td><?= htmlspecialchars($row['kelas']); ?></td> -->
                     <!-- <td><?= htmlspecialchars($row['angkatan']); ?></td> -->
                 </tr>
             <?php endwhile; ?>

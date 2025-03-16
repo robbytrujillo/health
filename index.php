@@ -11,13 +11,14 @@ require 'phpqrcode/qrlib.php'; // Pastikan ini adalah pustaka untuk membuat QR C
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Index | UKS Management</title>
-    <link rel="icon" type="image/x-icon" href="assets/img/ihbs-logo.png">
+    <link rel="icon" type="image/x-icon" href="assets/images/ihbs-logo-2.png">
 
     <!-- Bootstrap 4 CDN -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="assets/css/style-index.css">
+    <link rel="stylesheet" href="assets/css/style-hoverzoom.css">
 </head>
 <body>
 
@@ -30,7 +31,7 @@ require 'phpqrcode/qrlib.php'; // Pastikan ini adalah pustaka untuk membuat QR C
     <!-- Search Box -->
     <form method="GET" class="search-box">
         <div class="input-group mb-4">
-            <input type="text" name="nama_siswa" class="form-control" placeholder="🔍 Cari siswa..." required>
+            <input type="text" name="nama_siswa" class="form-control" placeholder="🔍 Cari siswa sakit..." required>
             <div class="input-group-append">
                 <button class="btn btn-success" type="submit">Cari</button>
             </div>
@@ -115,7 +116,7 @@ require 'phpqrcode/qrlib.php'; // Pastikan ini adalah pustaka untuk membuat QR C
         <div class="col-md-4">
             <div class="card bg-light mb-3 shadow-sm rounded-lg border-0">
                 <div class="card-body text-center">
-                    <img src="assets/img/ruang.svg" style="height: 320px" class="img-fluid">
+                    <img src="assets/images/student.svg" style="height: 320px" class="cover img-fluid">
                     <h5 class="mt-3 mb-3">Melihat Data Siswa</h5>
                     <a href="siswa-user.php" class="btn btn-outline-success btn-block font-weight-bold rounded-pill">Lihat Data</a>
                 </div>
@@ -125,9 +126,9 @@ require 'phpqrcode/qrlib.php'; // Pastikan ini adalah pustaka untuk membuat QR C
         <div class="col-md-4">
             <div class="card bg-light mb-3 shadow-sm rounded-lg border-0">
                 <div class="card-body text-center">
-                    <img src="assets/img/unit.svg" style="height: 320px" class="img-fluid">
+                    <img src="assets/images/sick.svg" style="height: 320px" class="cover img-fluid">
                     <h5 class="mt-3 mb-3">Melihat Siswa Sakit</h5>
-                    <a href="unit.php" class="btn btn-outline-success btn-block font-weight-bold rounded-pill">Lihat Data</a>
+                    <a href="siswa-sakit.php" class="btn btn-outline-success btn-block font-weight-bold rounded-pill">Lihat Data</a>
                 </div>
             </div>
         </div>
@@ -135,9 +136,9 @@ require 'phpqrcode/qrlib.php'; // Pastikan ini adalah pustaka untuk membuat QR C
         <div class="col-md-4">
             <div class="card bg-light mb-3 shadow-sm rounded-lg border-0">
                 <div class="card-body text-center">
-                    <img src="assets/img/stok.svg" style="height: 320px" class="img-fluid">
+                    <img src="assets/images/petugas.svg" style="height: 320px" class="cover img-fluid">
                     <h5 class="mt-3 mb-3">Melihat Stok Peralatan</h5>
-                    <a href="stok.php" class="btn btn-outline-success btn-block font-weight-bold rounded-pill">Lihat Data</a>
+                    <a href="petugas-uks.php" class="btn btn-outline-success btn-block font-weight-bold rounded-pill">Lihat Data</a>
                 </div>
             </div>
         </div>
