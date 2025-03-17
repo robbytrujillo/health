@@ -17,7 +17,7 @@ if (isset($_GET['search']) && !empty($_GET['search'])) {
 }
 
 // Hitung total data
-$countQuery = "SELECT COUNT(*) as total FROM tb_sakit $whereClause";
+$countQuery = "SELECT COUNT(*) as total FROM tb_sakit $whereClause ORDER BY tgl_sakit DESC";
 $stmt = $conn->prepare($countQuery);
 
 if (!empty($params)) {
@@ -30,7 +30,7 @@ $totalData = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalData / $limit);
 
 // Query untuk mengambil data siswa dengan pagination
-$sql = "SELECT * FROM tb_sakit $whereClause LIMIT ?, ?";
+$sql = "SELECT * FROM tb_sakit $whereClause ORDER BY tgl_sakit DESC LIMIT ?, ?";
 $stmt = $conn->prepare($sql);
 
 if (!empty($params)) {
@@ -66,8 +66,8 @@ $result = $stmt->get_result();
     </div>
     <h2 class="text-center">Daftar Siswa Sakit</h2>
 
-    <!-- Tombol Kembali -->
-    <!-- <a href="index.php" class="btn btn-outline-success mb-3 rounded-pill">🔙 Kembali</a> -->
+    <!-- Tombol Cetak -->
+    <a href="cetak-siswa-sakit.php" class="btn btn-outline-info mb-3 rounded-pill">📝 Cetak</a>
 
     <!-- Form Pencarian -->
     <div class="d-flex justify-content-end mb-3">

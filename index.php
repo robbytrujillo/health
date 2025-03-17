@@ -137,7 +137,7 @@ require 'phpqrcode/qrlib.php'; // Pastikan ini adalah pustaka untuk membuat QR C
             <div class="card bg-light mb-3 shadow-sm rounded-lg border-0">
                 <div class="card-body text-center">
                     <img src="assets/images/petugas.svg" style="height: 320px" class="cover img-fluid">
-                    <h5 class="mt-3 mb-3">Melihat Stok Peralatan</h5>
+                    <h5 class="mt-3 mb-3">Melihat Data Petugas</h5>
                     <a href="petugas-uks.php" class="btn btn-outline-success btn-block font-weight-bold rounded-pill">Lihat Data</a>
                 </div>
             </div>

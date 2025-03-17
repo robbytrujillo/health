@@ -65,8 +65,8 @@ $result = $stmt->get_result();
     </div>
     <h2 class="text-center">Daftar Petugas</h2>
 
-    <!-- Tombol Kembali -->
-    <!-- <a href="index.php" class="btn btn-outline-success mb-3 rounded-pill">🔙 Kembali</a> -->
+    <!-- Tombol Cetak -->
+    <a href="cetak-petugas-uks.php" class="btn btn-outline-info mb-3 rounded-pill">📝 Cetak</a>
 
     <!-- Form Pencarian -->
     <div class="d-flex justify-content-end mb-3">
