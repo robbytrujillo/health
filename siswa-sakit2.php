@@ -1,44 +1,33 @@
 <?php
 session_start();
-include 'config.php';
+include 'config.php'; // Pastikan ada koneksi database
 
-// ======================
 // Pagination
-// ======================
-$limit = 10;
-$page  = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-$page  = ($page < 1) ? 1 : $page;
+$limit = 10; // Jumlah data per halaman
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $start = ($page - 1) * $limit;
 
-// ======================
-// Search
-// ======================
+// Pencarian berdasarkan nama
 $whereClause = "";
 $params = [];
-$types  = "";
-
-if (!empty($_GET['search'])) {
+if (isset($_GET['search']) && !empty($_GET['search'])) {
     $search = "%" . $_GET['search'] . "%";
-    $whereClause = "WHERE tb_sakit.nama LIKE ?";
+    $whereClause = "WHERE nama LIKE ?";
     $params[] = $search;
     $types .= "s";
 }
 
-// ======================
-// COUNT DATA
-// ======================
-$countQuery = "SELECT COUNT(*) as total
+// Hitung total data
+// $countQuery = "SELECT COUNT(*) as total FROM tb_sakit $whereClause ORDER BY tgl_sakit DESC";
+$countQuery = "SELECT COUNT(*) as total 
                FROM tb_sakit
-               LEFT JOIN tb_petugas 
-               ON tb_sakit.id_petugas = tb_petugas.id
-               $whereClause";
-
+               LEFT JOIN petugas 
+               ON tb_sakit.id_petugas = petugas.id_petugas
+               $whereClause ORDER BY tgl_sakit DESC";
 $stmt = $conn->prepare($countQuery);
-if (!$stmt) {
-    die("COUNT Query Error: " . $conn->error);
-}
 
 if (!empty($params)) {
+    // $stmt->bind_param("s", ...$params);
     $stmt->bind_param($types, ...$params);
 }
 
@@ -47,32 +36,24 @@ $countResult = $stmt->get_result();
 $totalData = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalData / $limit);
 
-// ======================
-// SELECT DATA
-// ======================
-$sql = "SELECT tb_sakit.*, tb_petugas.nama_petugas
-        FROM tb_sakit
-        LEFT JOIN tb_petugas 
-        ON tb_sakit.id_petugas = tb_petugas.id
-        $whereClause
-        ORDER BY tb_sakit.tgl_sakit DESC
-        LIMIT ?, ?";
-
+// Query untuk mengambil data siswa dengan pagination
+$sql = "SELECT * FROM tb_sakit $whereClause ORDER BY tgl_sakit DESC LIMIT ?, ?";
 $stmt = $conn->prepare($sql);
-if (!$stmt) {
-    die("SELECT Query Error: " . $conn->error);
-}
 
 if (!empty($params)) {
+    // Jika ada filter pencarian
     $params[] = $start;
     $params[] = $limit;
-    $stmt->bind_param($types . "ii", ...$params);
+    $types = str_repeat("s", count($params) - 2) . "ii"; // Sesuaikan tipe data
+    $stmt->bind_param($types, ...$params);
 } else {
+    // Jika tanpa filter pencarian
     $stmt->bind_param("ii", $start, $limit);
 }
 
 $stmt->execute();
 $result = $stmt->get_result();
+
 ?>
 
 <!DOCTYPE html>
@@ -80,6 +61,7 @@ $result = $stmt->get_result();
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Siswa Sakit</title>
     <link rel="icon" type="image/x-icon" href="assets/images/ihbs-logo-2.png">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -87,26 +69,21 @@ $result = $stmt->get_result();
 
 <body>
     <div class="container mt-3">
-
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <img src="assets/images/uks1.png" style="width:110px;">
-            <a href="index.php" class="btn btn-outline-success rounded-pill">
-                🔙 <b>Kembali</b>
-            </a>
+            <img src="assets/images/uks1.png" style="width: 110px;">
+            <a href="index.php" class="btn btn-outline-success rounded-pill">🔙 <b>Kembali</b></a>
         </div>
+        <h2 class="text-center">Daftar Siswa Sakit</h2>
 
-        <h2 class="text-center mb-3">Daftar Siswa Sakit</h2>
+        <!-- Tombol Cetak -->
+        <a href="cetak-siswa-sakit.php" class="btn btn-outline-info mb-3 rounded-pill">📝 Cetak</a>
 
-        <a href="cetak-siswa-sakit.php" class="btn btn-outline-info mb-3 rounded-pill">
-            📝 Cetak
-        </a>
-
-        <!-- SEARCH -->
+        <!-- Form Pencarian -->
         <div class="d-flex justify-content-end mb-3">
             <form method="GET" class="form-inline">
-                <div class="input-group">
+                <div class="input-group" style="width: 100%;">
                     <input type="text" name="search" class="form-control" placeholder="Cari nama siswa..."
-                        value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                        value="<?= isset($_GET['search']) ? $_GET['search'] : '' ?>">
                     <div class="input-group-append">
                         <button type="submit" class="btn btn-outline-success">🔍</button>
                     </div>
@@ -114,16 +91,17 @@ $result = $stmt->get_result();
             </form>
         </div>
 
-        <!-- TABLE -->
-        <table class="table table-bordered table-striped">
-            <thead class="thead-light">
+        <!-- Tabel Data Siswa -->
+        <table class="table table-bordered">
+            <thead>
                 <tr>
                     <th>No</th>
-                    <th>Hari/Tanggal</th>
+                    <th>Hari/Tanggal Sakit</th>
                     <th>Waktu</th>
                     <th>NIS</th>
                     <th>Nama</th>
                     <th>Kelas</th>
+                    <!-- <th>Tanggal Sakit</th> -->
                     <th>Tekanan Darah</th>
                     <th>Suhu</th>
                     <th>Keluhan</th>
@@ -133,14 +111,15 @@ $result = $stmt->get_result();
                 </tr>
             </thead>
             <tbody>
-
                 <?php 
-        $no = $start + 1;
-        while ($row = $result->fetch_assoc()):
-        ?>
+                    $i = 1;
+                    while ($row = $result->fetch_assoc()):
+                        
+                ?>
+
                 <tr>
-                    <td><?= $no++; ?></td>
-                    <td><?= date('l, d F Y', strtotime($row['tgl_sakit'])); ?></td>
+                    <td><?= $i++; ?></td>
+                    <td><?= date('l,  d F Y', strtotime($row['tgl_sakit'])); ?></td>
                     <td><?= date('H:i', strtotime($row['tgl_sakit'])); ?></td>
                     <td><?= htmlspecialchars($row['nis']); ?></td>
                     <td><?= htmlspecialchars($row['nama']); ?></td>
@@ -157,49 +136,44 @@ $result = $stmt->get_result();
                     </td>
                 </tr>
                 <?php endwhile; ?>
-
             </tbody>
         </table>
 
-        <!-- PAGINATION -->
+        <!-- Pagination -->
         <nav>
             <ul class="pagination justify-content-center">
-
+                <!-- Tombol "Previous" -->
                 <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                    <a class="page-link"
-                        href="?page=<?= $page - 1 ?>&search=<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
-                        ❮
-                    </a>
+                    <a class="page-link" href="?page=<?= $page - 1 ?>">❮</a>
                 </li>
 
                 <?php
-            $startPage = max(1, $page - 2);
-            $endPage   = min($totalPages, $page + 2);
+        // Menentukan batas halaman yang ditampilkan
+        $startPage = max(1, $page - 2);
+        $endPage = min($totalPages, $page + 2);
 
-            for ($i = $startPage; $i <= $endPage; $i++):
-            ?>
+        for ($i = $startPage; $i <= $endPage; $i++): ?>
                 <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                    <a class="page-link"
-                        href="?page=<?= $i ?>&search=<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
-                        <?= $i ?>
-                    </a>
+                    <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
                 </li>
                 <?php endfor; ?>
 
+                <!-- Tombol "Next" -->
                 <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                    <a class="page-link"
-                        href="?page=<?= $page + 1 ?>&search=<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
-                        ❯
-                    </a>
+                    <a class="page-link" href="?page=<?= $page + 1 ?>">❯</a>
                 </li>
-
             </ul>
         </nav>
 
+
     </div>
 
+    <!-- Footer -->
     <?php include 'includes/footer.php'; ?>
 
+
+
+    <!-- Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 </body>
