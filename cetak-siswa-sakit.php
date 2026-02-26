@@ -9,6 +9,7 @@ $result = mysqli_query($conn, $query);
 <html>
 <head>
   <title>Data Siswa Sakit</title>
+  <link rel="icon" type="image/x-icon" href="assets/images/ihbs-logo-2.png">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/buttons/1.6.5/css/buttons.dataTables.min.css">

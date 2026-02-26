@@ -7,6 +7,7 @@ require 'phpqrcode/qrlib.php'; // Pastikan ini adalah pustaka untuk membuat QR C
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -20,29 +21,30 @@ require 'phpqrcode/qrlib.php'; // Pastikan ini adalah pustaka untuk membuat QR C
     <link rel="stylesheet" href="assets/css/style-index.css">
     <link rel="stylesheet" href="assets/css/style-hoverzoom.css">
 </head>
+
 <body>
 
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <img src="assets/images/uks1.png" style="width: 110px;">
-        <a href="login.php" class="btn btn-outline-success rounded-pill">🔐 <b>Login</b></a>
-    </div>
-
-    <!-- Search Box -->
-    <form method="GET" class="search-box">
-        <div class="input-group mb-4">
-            <input type="text" name="nama_siswa" class="form-control" placeholder="🔍 Cari siswa sakit..." required>
-            <div class="input-group-append">
-                <button class="btn btn-success" type="submit">Cari</button>
-            </div>
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <img src="assets/images/uks1.png" style="width: 110px;">
+            <a href="login.php" class="btn btn-outline-success rounded-pill">🔐 <b>Login</b></a>
         </div>
-    </form>
 
-    <div class="row">
-        <!-- Bagian Daftar Siswa -->
-        <div class="col-md-9">
-            <div class="row">
-                <?php
+        <!-- Search Box -->
+        <form method="GET" class="search-box">
+            <div class="input-group mb-4">
+                <input type="text" name="nama_siswa" class="form-control" placeholder="🔍 Cari siswa sakit..." required>
+                <div class="input-group-append">
+                    <button class="btn btn-success" type="submit">Cari</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="row">
+            <!-- Bagian Daftar Siswa -->
+            <div class="col-md-9">
+                <div class="row">
+                    <?php
                 if (isset($_GET['nama_siswa'])) {
                     $nama_siswa = $_GET['nama_siswa'];
                     
@@ -96,72 +98,77 @@ require 'phpqrcode/qrlib.php'; // Pastikan ini adalah pustaka untuk membuat QR C
                     $stmt->close();
                 }
                 ?>
+                </div>
             </div>
-        </div>
 
-        <!-- Bagian QR Code -->
-        <?php if (isset($qr_filename)) : ?>
+            <!-- Bagian QR Code -->
+            <?php if (isset($qr_filename)) : ?>
             <div class="col-md-3 text-center">
                 <div class="card p-4">
                     <h5>QR Code Siswa Sakit:</h5>
                     <img id="qrImage" src="<?= $qr_filename ?>" alt="QR Code Siswa">
-                    <button class="btn btn-success mt-3" onclick="printQRCode('<?= $qr_filename ?>')">🖨 Cetak QR Code</button>
+                    <button class="btn btn-success mt-3" onclick="printQRCode('<?= $qr_filename ?>')">🖨 Cetak QR
+                        Code</button>
                 </div>
             </div>
-        <?php endif; ?>
+            <?php endif; ?>
+        </div>
+
+        <!-- Bagian Navigasi -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card bg-light mb-3 shadow-sm rounded-lg border-0">
+                    <div class="card-body text-center">
+                        <img src="assets/images/student.svg" style="height: 320px" class="cover img-fluid">
+                        <h5 class="mt-3 mb-3">Melihat Data Siswa</h5>
+                        <a href="siswa-user.php"
+                            class="btn btn-outline-success btn-block font-weight-bold rounded-pill">Lihat Data</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card bg-light mb-3 shadow-sm rounded-lg border-0">
+                    <div class="card-body text-center">
+                        <img src="assets/images/sick.svg" style="height: 320px" class="cover img-fluid">
+                        <h5 class="mt-3 mb-3">Melihat Siswa Sakit</h5>
+                        <a href="siswa-sakit.php"
+                            class="btn btn-outline-success btn-block font-weight-bold rounded-pill">Lihat Data</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card bg-light mb-3 shadow-sm rounded-lg border-0">
+                    <div class="card-body text-center">
+                        <img src="assets/images/petugas2.svg" style="height: 320px" class="cover img-fluid">
+                        <h5 class="mt-3 mb-3">Melihat Data Petugas</h5>
+                        <a href="petugas-uks.php"
+                            class="btn btn-outline-success btn-block font-weight-bold rounded-pill">Lihat Data</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Bagian Navigasi -->
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card bg-light mb-3 shadow-sm rounded-lg border-0">
-                <div class="card-body text-center">
-                    <img src="assets/images/student.svg" style="height: 320px" class="cover img-fluid">
-                    <h5 class="mt-3 mb-3">Melihat Data Siswa</h5>
-                    <a href="siswa-user.php" class="btn btn-outline-success btn-block font-weight-bold rounded-pill">Lihat Data</a>
-                </div>
-            </div>
-        </div>
+    <!-- Footer -->
+    <?php include 'includes/footer.php'; ?>
 
-        <div class="col-md-4">
-            <div class="card bg-light mb-3 shadow-sm rounded-lg border-0">
-                <div class="card-body text-center">
-                    <img src="assets/images/sick.svg" style="height: 320px" class="cover img-fluid">
-                    <h5 class="mt-3 mb-3">Melihat Siswa Sakit</h5>
-                    <a href="siswa-sakit.php" class="btn btn-outline-success btn-block font-weight-bold rounded-pill">Lihat Data</a>
-                </div>
-            </div>
-        </div>
+    <!-- Bootstrap 4 JS & jQuery CDN -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-        <div class="col-md-4">
-            <div class="card bg-light mb-3 shadow-sm rounded-lg border-0">
-                <div class="card-body text-center">
-                    <img src="assets/images/petugas.svg" style="height: 320px" class="cover img-fluid">
-                    <h5 class="mt-3 mb-3">Melihat Data Petugas</h5>
-                    <a href="petugas-uks.php" class="btn btn-outline-success btn-block font-weight-bold rounded-pill">Lihat Data</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Footer -->
-<?php include 'includes/footer.php'; ?>
-
-<!-- Bootstrap 4 JS & jQuery CDN -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-
-<script>
-function printQRCode(url) {
-    var qrWindow = window.open('', '_blank');
-    qrWindow.document.write('<html><head><title>Cetak QR Code</title></head><body>');
-    qrWindow.document.write('<img src="' + url + '" style="width:750px;">');
-    qrWindow.document.write('<script>window.onload = function() { window.print(); window.close(); }<' + '/script>');
-    qrWindow.document.write('</body></html>');
-    qrWindow.document.close();
-}
-</script>
+    <script>
+    function printQRCode(url) {
+        var qrWindow = window.open('', '_blank');
+        qrWindow.document.write('<html><head><title>Cetak QR Code</title></head><body>');
+        qrWindow.document.write('<img src="' + url + '" style="width:750px;">');
+        qrWindow.document.write('<script>window.onload = function() { window.print(); window.close(); }<' + '/script>');
+        qrWindow.document.write('</body></html>');
+        qrWindow.document.close();
+    }
+    </script>
 
 </body>
+
 </html>
