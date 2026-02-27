@@ -75,12 +75,19 @@ $result = $stmt->get_result();
 <head>
     <meta charset="UTF-8">
     <title>Data Siswa Sakit</title>
-
+    <link rel="icon" type="image/x-icon" href="assets/images/ihbs-logo-2.png">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 
 <body>
     <div class="container mt-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <img src="assets/images/uks1.png" style="width:110px;">
+            <a href="index.php" class="btn btn-outline-success rounded-pill">
+                🔙 <b>Kembali</b>
+            </a>
+        </div>
 
         <h3 class="text-center mb-4">Daftar Siswa Sakit</h3>
 
@@ -192,7 +199,7 @@ for ($i = $startPage; $i <= $endPage; $i++):
                     <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                 </div>
 
-                <div class="modal-body">
+                <div class="modal-body" id="printArea">
                     <table class="table table-bordered">
                         <tr>
                             <th>NIS</th>
@@ -238,12 +245,17 @@ for ($i = $startPage; $i <= $endPage; $i++):
                 </div>
 
                 <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="printModal()">
+                        🖨 Print
+                    </button>
                     <button class="btn btn-secondary" data-dismiss="modal">Tutup</button>
                 </div>
 
             </div>
         </div>
     </div>
+
+    <?php include 'includes/footer.php'; ?>
 
     <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -265,6 +277,38 @@ for ($i = $startPage; $i <= $endPage; $i++):
 
         $("#detailModal").modal("show");
     });
+    </script>
+
+    <script>
+    function printModal() {
+
+        var printContents = document.getElementById('printArea').innerHTML;
+
+        var printWindow = window.open('', '', 'height=700,width=900');
+
+        printWindow.document.write(`
+        <html>
+        <head>
+            <title>Print Detail Data Siswa</title>
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+            <style>
+                body { padding: 30px; font-family: Arial; }
+                table { width: 100%; }
+                th { width: 30%; }
+            </style>
+        </head>
+        <body>
+            <h4 class="text-center mb-4">Detail Data Siswa Sakit</h4>
+            ${printContents}
+        </body>
+        </html>
+    `);
+
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+    }
     </script>
 
 </body>
