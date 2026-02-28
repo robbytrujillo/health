@@ -77,6 +77,36 @@ $result = $stmt->get_result();
     <title>Data Siswa Sakit</title>
     <link rel="icon" type="image/x-icon" href="assets/images/ihbs-logo-2.png">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- font awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+        integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: bold;
+    }
+
+    p,
+    a,
+    th,
+    td,
+    tr,
+    input,
+    button {
+        font-family: 'Poppins', sans-serif;
+    }
+    </style>
 </head>
 
 <body>
@@ -85,7 +115,7 @@ $result = $stmt->get_result();
         <div class="d-flex justify-content-between align-items-center mb-4">
             <img src="assets/images/uks1.png" style="width:110px;">
             <a href="index.php" class="btn btn-outline-success rounded-pill">
-                🔙 <b>Kembali</b>
+                <i class="fas fa-arrow-left"></i> <b>Kembali</b>
             </a>
         </div>
 
@@ -98,7 +128,7 @@ $result = $stmt->get_result();
                     <input type="text" name="search" class="form-control" placeholder="Cari nama siswa..."
                         value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
                     <div class="input-group-append">
-                        <button type="submit" class="btn btn-outline-success">🔍</button>
+                        <button type="submit" class="btn btn-outline-secondary"><i class="fas fa-search"></i></button>
                     </div>
                 </div>
             </form>
@@ -120,9 +150,10 @@ $result = $stmt->get_result();
             <tbody>
 
                 <?php 
-$no = $start + 1;
-while ($row = $result->fetch_assoc()):
-?>
+                    $no = $start + 1;
+                    while ($row = $result->fetch_assoc()):
+                ?>
+
                 <tr>
                     <td><?= $no++; ?></td>
                     <td><?= date('l, d F Y', strtotime($row['tgl_sakit'])); ?></td>
@@ -131,17 +162,19 @@ while ($row = $result->fetch_assoc()):
                     <td><?= htmlspecialchars($row['kelas']); ?></td>
                     <td><?= htmlspecialchars($row['diagnosa']); ?></td>
                     <td class="text-center">
-                        <button class="btn btn-info btn-sm btn-detail" data-nis="<?= htmlspecialchars($row['nis']); ?>"
+                        <button style="border-radius: 30px;" class="btn btn-info btn-sm btn-detail"
+                            data-nis="<?= htmlspecialchars($row['nis']); ?>"
                             data-nama="<?= htmlspecialchars($row['nama']); ?>"
                             data-kelas="<?= htmlspecialchars($row['kelas']); ?>"
-                            data-tanggal="<?= date('l, d F Y H:i', strtotime($row['tgl_sakit'])); ?>"
+                            data-tanggal="<?= date('l, d F Y', strtotime($row['tgl_sakit'])); ?>"
+                            data-jam="<?= date('H:i', strtotime($row['tgl_sakit'])); ?>"
                             data-tekanan="<?= htmlspecialchars($row['tekanan_darah']); ?>"
                             data-suhu="<?= htmlspecialchars($row['suhu']); ?>"
                             data-keluhan="<?= htmlspecialchars($row['keluhan']); ?>"
                             data-diagnosa="<?= htmlspecialchars($row['diagnosa']); ?>"
                             data-penanganan="<?= htmlspecialchars($row['penanganan']); ?>"
                             data-petugas="<?= htmlspecialchars($row['nama_petugas']); ?>">
-                            Detail
+                            <i class="fas fa-info-circle"></i> Detail
                         </button>
                     </td>
                 </tr>
@@ -194,7 +227,7 @@ for ($i = $startPage; $i <= $endPage; $i++):
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
 
-                <div class="modal-header bg-success text-white">
+                <div class="modal-header bg-light text-black">
                     <h5 class="modal-title">Detail Data Siswa</h5>
                     <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                 </div>
@@ -218,6 +251,10 @@ for ($i = $startPage; $i <= $endPage; $i++):
                             <td id="d_tanggal"></td>
                         </tr>
                         <tr>
+                            <th>Jam</th>
+                            <td id="d_jam"></td>
+                        </tr>
+                        <tr>
                             <th>Tekanan Darah</th>
                             <td id="d_tekanan"></td>
                         </tr>
@@ -230,12 +267,12 @@ for ($i = $startPage; $i <= $endPage; $i++):
                             <td id="d_keluhan"></td>
                         </tr>
                         <tr>
-                            <th>Diagnosa</th>
-                            <td id="d_diagnosa"></td>
-                        </tr>
-                        <tr>
                             <th>Penanganan</th>
                             <td id="d_penanganan"></td>
+                        </tr>
+                        <tr>
+                            <th>Diagnosa</th>
+                            <td id="d_diagnosa"></td>
                         </tr>
                         <tr>
                             <th>Petugas</th>
@@ -245,10 +282,11 @@ for ($i = $startPage; $i <= $endPage; $i++):
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="printModal()">
-                        🖨 Print
+                    <button type="button" class="btn btn-primary" style="border-radius: 30px;" onclick="printModal()">
+                        <i class="fas fa-print"></i> Cetak
                     </button>
-                    <button class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                    <button class="btn btn-secondary" style="border-radius: 30px;" data-dismiss="modal"><i
+                            class="fas fa-times"></i> Tutup</button>
                 </div>
 
             </div>
@@ -256,6 +294,10 @@ for ($i = $startPage; $i <= $endPage; $i++):
     </div>
 
     <?php include 'includes/footer.php'; ?>
+
+    <?php
+        $logoURL = "http://" . $_SERVER['HTTP_HOST'] . "/health/assets/images/logo-sma.png";
+    ?>
 
     <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -268,6 +310,7 @@ for ($i = $startPage; $i <= $endPage; $i++):
         $("#d_nama").text($(this).data("nama"));
         $("#d_kelas").text($(this).data("kelas"));
         $("#d_tanggal").text($(this).data("tanggal"));
+        $("#d_jam").text($(this).data("jam"));
         $("#d_tekanan").text($(this).data("tekanan"));
         $("#d_suhu").text($(this).data("suhu") + " °C");
         $("#d_keluhan").text($(this).data("keluhan"));
@@ -279,7 +322,7 @@ for ($i = $startPage; $i <= $endPage; $i++):
     });
     </script>
 
-    <script>
+    <!-- <script>
     function printModal() {
 
         var printContents = document.getElementById('printArea').innerHTML;
@@ -308,6 +351,64 @@ for ($i = $startPage; $i <= $endPage; $i++):
         printWindow.focus();
         printWindow.print();
         printWindow.close();
+    }
+    </script> -->
+
+    <script>
+    function printModal() {
+
+        var printContents = document.getElementById('printArea').innerHTML;
+        var printWindow = window.open('', '', 'height=700,width=900');
+
+        var logoPath = "<?= $logoURL ?>";
+
+        printWindow.document.write(`
+        <html>
+        <head>
+            <title>Print Detail Data Siswa</title>
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+            <style>
+                body { padding: 40px; font-family: Arial; }
+                .header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    position: relative;
+                    margin-bottom: 30px;
+                }
+                .logo { position: absolute; left: 0; }
+                .logo img { width: 60px; }
+                .title {
+                    text-align: center;
+                    font-size: 22px;
+                    font-weight: bold;
+                }
+                table { width: 100%; }
+                th { width: 30%; }
+            </style>
+        </head>
+        <body>
+
+            <div class="header">
+                
+                    <div class="logo">
+                        <img src="${logoPath}">
+                    </div>
+                    <div class="title">
+                        DATA SISWA SAKIT
+                    </div>
+                
+            </div>
+
+            ${printContents}
+
+        </body>
+        </html>
+    `);
+
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
     }
     </script>
 
