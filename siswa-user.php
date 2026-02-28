@@ -67,6 +67,20 @@ $result = $stmt->get_result();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
+    html,
+    body {
+        height: 100%;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .main-wrapper {
+        flex: 1;
+    }
+
     h1,
     h2,
     h3,

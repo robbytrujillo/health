@@ -67,6 +67,39 @@ if (!empty($params)) {
 
 $stmt->execute();
 $result = $stmt->get_result();
+
+/* ======================
+   HARI INDO
+====================== */
+function hariIndonesia($tanggal) {
+    $hari = date('l', strtotime($tanggal));
+
+    $hariIndo = [
+        'Sunday'    => 'Minggu',
+        'Monday'    => 'Senin',
+        'Tuesday'   => 'Selasa',
+        'Wednesday' => 'Rabu',
+        'Thursday'  => 'Kamis',
+        'Friday'    => 'Jumat',
+        'Saturday'  => 'Sabtu'
+    ];
+
+    return $hariIndo[$hari];
+}
+
+function tanggalIndonesia($tanggal) {
+
+    $bulan = [
+        1 => 'Januari','Februari','Maret','April','Mei','Juni',
+        'Juli','Agustus','September','Oktober','November','Desember'
+    ];
+
+    $tanggalExplode = explode('-', date('Y-m-d', strtotime($tanggal)));
+
+    return $tanggalExplode[2] . ' ' .
+           $bulan[(int)$tanggalExplode[1]] . ' ' .
+           $tanggalExplode[0];
+}
 ?>
 
 <!DOCTYPE html>
@@ -74,6 +107,7 @@ $result = $stmt->get_result();
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Siswa Sakit</title>
     <link rel="icon" type="image/x-icon" href="assets/images/ihbs-logo-2.png">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -87,6 +121,33 @@ $result = $stmt->get_result();
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
+    html,
+    body {
+        height: 100%;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .main-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .container {
+        flex: 1;
+    }
+
+    footer {
+        margin-top: 3;
+        background: #f8f9fa;
+        padding: 15px 0;
+    }
+
     h1,
     h2,
     h3,
@@ -106,198 +167,262 @@ $result = $stmt->get_result();
     button {
         font-family: 'Poppins', sans-serif;
     }
+
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 750px;
+    }
+
+    .pagination .page-link {
+        border-radius: 20px;
+        margin: 0 3px;
+    }
+
+    .pagination .active .page-link {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+
+    .modal-dialog {
+        margin: 1rem auto;
+    }
+
+    @media (max-width: 576px) {
+        .modal-lg {
+            max-width: 95%;
+        }
+
+        .modal-body {
+            padding: 15px;
+        }
+
+        .modal-title {
+            font-size: 16px;
+        }
+
+        .table th {
+            font-size: 13px;
+        }
+
+        .table td {
+            font-size: 13px;
+        }
+    }
     </style>
 </head>
 
 <body>
-    <div class="container mt-4">
+    <div class="main-wrapper">
+        <div class="container mt-4">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <img src="assets/images/uks1.png" style="width:110px;">
-            <a href="index.php" class="btn btn-outline-success rounded-pill">
-                <i class="fas fa-arrow-left"></i> <b>Kembali</b>
-            </a>
-        </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <img src="assets/images/uks1.png" style="width:110px;">
+                <a href="index.php" class="btn btn-outline-success rounded-pill">
+                    <i class="fas fa-arrow-left"></i> <b>Kembali</b>
+                </a>
+            </div>
 
-        <h3 class="text-center mb-4">Daftar Siswa Sakit</h3>
+            <h3 class="text-center mb-4">Daftar Siswa Sakit</h3>
 
-        <!-- SEARCH -->
-        <div class="d-flex justify-content-end mb-3">
-            <form method="GET" class="form-inline">
-                <div class="input-group">
-                    <input type="text" name="search" class="form-control" placeholder="Cari nama siswa..."
-                        value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
-                    <div class="input-group-append">
-                        <button type="submit" class="btn btn-outline-secondary"><i class="fas fa-search"></i></button>
+            <!-- SEARCH -->
+            <div class="d-flex justify-content-end mb-3">
+                <form method="GET" class="form-inline">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Cari nama siswa..."
+                            value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                        <div class="input-group-append">
+                            <button type="submit" class="btn btn-outline-secondary"><i
+                                    class="fas fa-search"></i></button>
+                        </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
+
+            <!-- TABLE -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-sm text-nowrap">
+                    <thead class="thead-light text-center">
+                        <tr>
+                            <th>No</th>
+                            <th>Hari / Tanggal</th>
+                            <th>Waktu</th>
+                            <th>Nama</th>
+                            <th>Kelas</th>
+                            <th>Diagnosa</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <?php 
+                        $no = $start + 1;
+                        while ($row = $result->fetch_assoc()):
+                    ?>
+
+                        <tr>
+                            <td><?= $no++; ?></td>
+                            <!--<td><?= date('l, d F Y', strtotime($row['tgl_sakit'])); ?></td>-->
+                            <td>
+                                <?= hariIndonesia($row['tgl_sakit']); ?>,
+                                <?= tanggalIndonesia($row['tgl_sakit']); ?>
+                            </td>
+                            <td><?= date('H:i', strtotime($row['tgl_sakit'])); ?></td>
+                            <td><?= htmlspecialchars($row['nama']); ?></td>
+                            <td><?= htmlspecialchars($row['kelas']); ?></td>
+                            <td><?= htmlspecialchars($row['diagnosa']); ?></td>
+                            <td class="text-center">
+                                <button style="border-radius: 30px;" class="btn btn-info btn-sm btn-detail"
+                                    data-nis="<?= htmlspecialchars($row['nis']); ?>"
+                                    data-nama="<?= htmlspecialchars($row['nama']); ?>"
+                                    data-kelas="<?= htmlspecialchars($row['kelas']); ?>" data-tanggal="
+                                
+                                    <?= hariIndonesia($row['tgl_sakit']); ?>,
+                                    <?= tanggalIndonesia($row['tgl_sakit']); ?>
+                                
+                                " data-jam="<?= date('H:i', strtotime($row['tgl_sakit'])); ?>"
+                                    data-tekanan="<?= htmlspecialchars($row['tekanan_darah']); ?>"
+                                    data-suhu="<?= htmlspecialchars($row['suhu']); ?>"
+                                    data-keluhan="<?= htmlspecialchars($row['keluhan']); ?>"
+                                    data-diagnosa="<?= htmlspecialchars($row['diagnosa']); ?>"
+                                    data-penanganan="<?= htmlspecialchars($row['penanganan']); ?>"
+                                    data-petugas="<?= htmlspecialchars($row['nama_petugas']); ?>">
+                                    <i class="fas fa-info-circle"></i> Detail
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endwhile; ?>
+
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            <nav>
+                <ul class="pagination justify-content-center">
+
+                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                        <a class="page-link"
+                            href="?page=<?= $page - 1 ?>&search=<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                            ❮
+                        </a>
+                    </li>
+
+                    <?php
+                        $startPage = max(1, $page - 2);
+                        $endPage   = min($totalPages, $page + 2);
+                        
+                        for ($i = $startPage; $i <= $endPage; $i++):
+                    ?>
+                    <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
+                        <a class="page-link"
+                            href="?page=<?= $i ?>&search=<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                            <?= $i ?>
+                        </a>
+                    </li>
+                    <?php endfor; ?>
+
+                    <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                        <a class="page-link"
+                            href="?page=<?= $page + 1 ?>&search=<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
+                            ❯
+                        </a>
+                    </li>
+
+                </ul>
+            </nav>
+
         </div>
 
-        <!-- TABLE -->
-        <table class="table table-bordered table-striped">
-            <thead class="thead-light text-center">
-                <tr>
-                    <th>No</th>
-                    <th>Hari / Tanggal</th>
-                    <th>Waktu</th>
-                    <th>Nama</th>
-                    <th>Kelas</th>
-                    <th>Diagnosa</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
+        <!-- =========================
+             SINGLE MODAL RESPONSIVE
+        ========================= -->
+        <div class="modal fade" id="detailModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
 
-                <?php 
-                    $no = $start + 1;
-                    while ($row = $result->fetch_assoc()):
-                ?>
+                    <div class="modal-header bg-light">
+                        <h5 class="modal-title">Detail Data Siswa</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
 
-                <tr>
-                    <td><?= $no++; ?></td>
-                    <td><?= date('l, d F Y', strtotime($row['tgl_sakit'])); ?></td>
-                    <td><?= date('H:i', strtotime($row['tgl_sakit'])); ?></td>
-                    <td><?= htmlspecialchars($row['nama']); ?></td>
-                    <td><?= htmlspecialchars($row['kelas']); ?></td>
-                    <td><?= htmlspecialchars($row['diagnosa']); ?></td>
-                    <td class="text-center">
-                        <button style="border-radius: 30px;" class="btn btn-info btn-sm btn-detail"
-                            data-nis="<?= htmlspecialchars($row['nis']); ?>"
-                            data-nama="<?= htmlspecialchars($row['nama']); ?>"
-                            data-kelas="<?= htmlspecialchars($row['kelas']); ?>"
-                            data-tanggal="<?= date('l, d F Y', strtotime($row['tgl_sakit'])); ?>"
-                            data-jam="<?= date('H:i', strtotime($row['tgl_sakit'])); ?>"
-                            data-tekanan="<?= htmlspecialchars($row['tekanan_darah']); ?>"
-                            data-suhu="<?= htmlspecialchars($row['suhu']); ?>"
-                            data-keluhan="<?= htmlspecialchars($row['keluhan']); ?>"
-                            data-diagnosa="<?= htmlspecialchars($row['diagnosa']); ?>"
-                            data-penanganan="<?= htmlspecialchars($row['penanganan']); ?>"
-                            data-petugas="<?= htmlspecialchars($row['nama_petugas']); ?>">
-                            <i class="fas fa-info-circle"></i> Detail
+                    <div class="modal-body" id="printArea">
+
+                        <!-- Tambahkan ini supaya table bisa scroll di HP -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <tr>
+                                    <th style="width:40%">NIS</th>
+                                    <td id="d_nis"></td>
+                                </tr>
+                                <tr>
+                                    <th>Nama</th>
+                                    <td id="d_nama"></td>
+                                </tr>
+                                <tr>
+                                    <th>Kelas</th>
+                                    <td id="d_kelas"></td>
+                                </tr>
+                                <tr>
+                                    <th>Hari / Tanggal</th>
+                                    <td id="d_tanggal"></td>
+                                </tr>
+                                <tr>
+                                    <th>Jam</th>
+                                    <td id="d_jam"></td>
+                                </tr>
+                                <tr>
+                                    <th>Tekanan Darah</th>
+                                    <td id="d_tekanan"></td>
+                                </tr>
+                                <tr>
+                                    <th>Suhu</th>
+                                    <td id="d_suhu"></td>
+                                </tr>
+                                <tr>
+                                    <th>Keluhan</th>
+                                    <td id="d_keluhan"></td>
+                                </tr>
+                                <tr>
+                                    <th>Penanganan</th>
+                                    <td id="d_penanganan"></td>
+                                </tr>
+                                <tr>
+                                    <th>Diagnosa</th>
+                                    <td id="d_diagnosa"></td>
+                                </tr>
+                                <tr>
+                                    <th>Petugas</th>
+                                    <td id="d_petugas"></td>
+                                </tr>
+                            </table>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer justify-content-between">
+                        <button type="button" class="btn btn-primary rounded-pill" onclick="printModal()">
+                            <i class="fas fa-print"></i> Cetak
                         </button>
-                    </td>
-                </tr>
-                <?php endwhile; ?>
 
-            </tbody>
-        </table>
+                        <button class="btn btn-secondary rounded-pill" data-dismiss="modal">
+                            <i class="fas fa-times"></i> Tutup
+                        </button>
+                    </div>
 
-        <!-- PAGINATION -->
-        <nav>
-            <ul class="pagination justify-content-center">
-
-                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                    <a class="page-link"
-                        href="?page=<?= $page - 1 ?>&search=<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
-                        ❮
-                    </a>
-                </li>
-
-                <?php
-$startPage = max(1, $page - 2);
-$endPage   = min($totalPages, $page + 2);
-
-for ($i = $startPage; $i <= $endPage; $i++):
-?>
-                <li class="page-item <?= ($i == $page) ? 'active' : '' ?>">
-                    <a class="page-link"
-                        href="?page=<?= $i ?>&search=<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
-                        <?= $i ?>
-                    </a>
-                </li>
-                <?php endfor; ?>
-
-                <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                    <a class="page-link"
-                        href="?page=<?= $page + 1 ?>&search=<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>">
-                        ❯
-                    </a>
-                </li>
-
-            </ul>
-        </nav>
-
-    </div>
-
-    <!-- =========================
-     SINGLE MODAL
-========================= -->
-    <div class="modal fade" id="detailModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-
-                <div class="modal-header bg-light text-black">
-                    <h5 class="modal-title">Detail Data Siswa</h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                 </div>
-
-                <div class="modal-body" id="printArea">
-                    <table class="table table-bordered">
-                        <tr>
-                            <th>NIS</th>
-                            <td id="d_nis"></td>
-                        </tr>
-                        <tr>
-                            <th>Nama</th>
-                            <td id="d_nama"></td>
-                        </tr>
-                        <tr>
-                            <th>Kelas</th>
-                            <td id="d_kelas"></td>
-                        </tr>
-                        <tr>
-                            <th>Hari / Tanggal</th>
-                            <td id="d_tanggal"></td>
-                        </tr>
-                        <tr>
-                            <th>Jam</th>
-                            <td id="d_jam"></td>
-                        </tr>
-                        <tr>
-                            <th>Tekanan Darah</th>
-                            <td id="d_tekanan"></td>
-                        </tr>
-                        <tr>
-                            <th>Suhu</th>
-                            <td id="d_suhu"></td>
-                        </tr>
-                        <tr>
-                            <th>Keluhan</th>
-                            <td id="d_keluhan"></td>
-                        </tr>
-                        <tr>
-                            <th>Penanganan</th>
-                            <td id="d_penanganan"></td>
-                        </tr>
-                        <tr>
-                            <th>Diagnosa</th>
-                            <td id="d_diagnosa"></td>
-                        </tr>
-                        <tr>
-                            <th>Petugas</th>
-                            <td id="d_petugas"></td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" style="border-radius: 30px;" onclick="printModal()">
-                        <i class="fas fa-print"></i> Cetak
-                    </button>
-                    <button class="btn btn-secondary" style="border-radius: 30px;" data-dismiss="modal"><i
-                            class="fas fa-times"></i> Tutup</button>
-                </div>
-
             </div>
         </div>
+
+    </div>
     </div>
 
     <?php include 'includes/footer.php'; ?>
 
-    <?php
-        $logoURL = "http://" . $_SERVER['HTTP_HOST'] . "/health/assets/images/logo-sma.png";
-    ?>
+
 
     <!-- JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -354,6 +479,10 @@ for ($i = $startPage; $i <= $endPage; $i++):
     }
     </script> -->
 
+    <?php
+        $logoURL = "http://" . $_SERVER['HTTP_HOST'] . "/health/assets/images/logo-sma.png";
+    ?>
+
     <script>
     function printModal() {
 
@@ -367,8 +496,11 @@ for ($i = $startPage; $i <= $endPage; $i++):
         <head>
             <title>Print Detail Data Siswa</title>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+            
+            <!-- Google Font Poppins -->
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
             <style>
-                body { padding: 40px; font-family: Arial; }
+                body { padding: 40px; font-family: Poppins; }
                 .header {
                     display: flex;
                     align-items: center;
