@@ -4,6 +4,37 @@ require 'config.php';
 require 'phpqrcode/qrlib.php';
 
 /* ===============================
+   GRAFIK SISWA SAKIT PER BULAN
+================================= */
+
+$tahunAktif = isset($_GET['tahun']) ? $_GET['tahun'] : date('Y');
+
+$queryChart = "
+SELECT 
+    MONTH(tgl_sakit) as bulan,
+    COUNT(*) as jumlah
+FROM tb_sakit
+WHERE YEAR(tgl_sakit) = '$tahunAktif'
+GROUP BY MONTH(tgl_sakit)
+ORDER BY bulan ASC
+";
+
+$resultChart = $conn->query($queryChart);
+
+$dataBulanan = array_fill(1, 12, 0);
+
+while($row = $resultChart->fetch_assoc()){
+    $dataBulanan[(int)$row['bulan']] = (int)$row['jumlah'];
+}
+
+$namaBulan = [
+    'Jan','Feb','Mar','Apr','Mei','Jun',
+    'Jul','Agu','Sep','Okt','Nov','Des'
+];
+
+$jumlahChart = array_values($dataBulanan);
+
+/* ===============================
    SISWA YANG SERING SAKIT
 ================================= */
 $querySeringSakit = "
@@ -90,6 +121,23 @@ $resultSeringSakit = $conn->query($querySeringSakit);
 
     .pagination .page-link {
         border-radius: 30px !important;
+    }
+
+    .chart-wrapper {
+        position: relative;
+        width: 100%;
+        overflow-x: auto;
+    }
+
+    canvas {
+        max-width: 100%;
+    }
+
+    @media (max-width:768px) {
+        .chart-navigation button {
+            width: 100px;
+            margin-bottom: 10px;
+        }
     }
     </style>
 </head>
@@ -229,6 +277,47 @@ $resultSeringSakit = $conn->query($querySeringSakit);
         </div>
 
         <!-- =========================
+        GRAFIK SISWA SAKIT PER BULAN
+        ========================= -->
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+            <h4 class="font-weight-bold mb-2">📈 Grafik Siswa Sakit per Bulan</h4>
+
+            <form method="GET" class="form-inline">
+                <select name="tahun" class="form-control rounded-pill" onchange="this.form.submit()">
+                    <?php
+            $tahunNow = date('Y');
+            for($t = $tahunNow; $t >= 2020; $t--):
+            ?>
+                    <option value="<?= $t ?>" <?= ($tahunAktif == $t) ? 'selected' : '' ?>>
+                        <?= $t ?>
+                    </option>
+                    <?php endfor; ?>
+                </select>
+            </form>
+        </div>
+
+        <!-- CARD CHART RESPONSIVE MODERN -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+
+                <div class="chart-navigation text-center mb-3">
+                    <button onclick="prevChart()" class="btn btn-outline-success rounded-pill btn-sm px-4 mr-2">
+                        ◀ Prev
+                    </button>
+
+                    <button onclick="nextChart()" class="btn btn-outline-success rounded-pill btn-sm px-4">
+                        Next ▶
+                    </button>
+                </div>
+
+                <div class="chart-wrapper">
+                    <canvas id="chartSakitBulanan"></canvas>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- =========================
          DASHBOARD SISWA SERING SAKIT
         ========================= -->
         <div class="card row mb-2 shadow-sm border-0">
@@ -327,6 +416,97 @@ $resultSeringSakit = $conn->query($querySeringSakit);
         qrWindow.document.write('<script>window.onload = function() { window.print(); window.close(); }<' + '/script>');
         qrWindow.document.write('</body></html>');
         qrWindow.document.close();
+    }
+    </script>
+
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+    const ctx = document.getElementById('chartSakitBulanan').getContext('2d');
+
+    const chartSakitBulanan = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: <?= json_encode($bulanChart); ?>,
+            datasets: [{
+                label: 'Jumlah Siswa Sakit',
+                data: <?= json_encode($jumlahChart); ?>,
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    </script> -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+    const allLabels = <?= json_encode($namaBulan); ?>;
+    const allData = <?= json_encode($jumlahChart); ?>;
+
+    let startIndex = 0;
+    const itemsPerPage = 3;
+
+    const ctx = document.getElementById('chartSakitBulanan').getContext('2d');
+
+    let chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: allLabels.slice(startIndex, startIndex + itemsPerPage),
+            datasets: [{
+                label: 'Jumlah Siswa Sakit',
+                data: allData.slice(startIndex, startIndex + itemsPerPage),
+                borderWidth: 2,
+                borderRadius: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    function updateChart() {
+        chart.data.labels = allLabels.slice(startIndex, startIndex + itemsPerPage);
+        chart.data.datasets[0].data = allData.slice(startIndex, startIndex + itemsPerPage);
+        chart.update();
+    }
+
+    function nextChart() {
+        if (startIndex + itemsPerPage < allLabels.length) {
+            startIndex += itemsPerPage;
+            updateChart();
+        }
+    }
+
+    function prevChart() {
+        if (startIndex - itemsPerPage >= 0) {
+            startIndex -= itemsPerPage;
+            updateChart();
+        }
     }
     </script>
 
