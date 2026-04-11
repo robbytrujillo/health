@@ -73,8 +73,31 @@ $querySeringSakit = "
     LIMIT $startSering, $limit
 ";
 
-
 $resultSeringSakit = $conn->query($querySeringSakit);
+
+/* ===============================
+   TOTAL SAKIT BULAN INI
+================================= */
+$bulanSekarang = date('m');
+$tahunSekarang = date('Y');
+
+$queryBulanIni = "
+SELECT COUNT(*) as total_bulan
+FROM tb_sakit
+WHERE MONTH(tgl_sakit) = '$bulanSekarang'
+AND YEAR(tgl_sakit) = '$tahunSekarang'
+";
+$totalBulanIni = $conn->query($queryBulanIni)->fetch_assoc()['total_bulan'];
+
+/* ===============================
+   TOTAL SAKIT TAHUN INI
+================================= */
+$queryTahunIni = "
+SELECT COUNT(*) as total_tahun
+FROM tb_sakit
+WHERE YEAR(tgl_sakit) = '$tahunSekarang'
+";
+$totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
 ?>
 
 <!DOCTYPE html>
@@ -133,10 +156,42 @@ $resultSeringSakit = $conn->query($querySeringSakit);
         max-width: 100%;
     }
 
-    @media (max-width:768px) {
+    @media (max-width: 768px) {
         .chart-navigation button {
             width: 100px;
             margin-bottom: 10px;
+        }
+
+        select[name="tahun"] {
+            width: 180px;
+            margin: auto;
+        }
+
+        h4 {
+            text-align: center !important;
+        }
+
+        .badge-pill {
+            display: inline-block;
+            margin-top: 8px;
+        }
+
+        .table th,
+        .table td {
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .pagination {
+            justify-content: center;
+        }
+
+        .card-body h2 {
+            font-size: 28px;
+        }
+
+        .card-body h6 {
+            font-size: 14px;
         }
     }
     </style>
@@ -279,21 +334,29 @@ $resultSeringSakit = $conn->query($querySeringSakit);
         <!-- =========================
         GRAFIK SISWA SAKIT PER BULAN
         ========================= -->
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-            <h4 class="font-weight-bold mb-2">📈 Grafik Siswa Sakit per Bulan</h4>
+        <div class="row align-items-center mb-4">
 
-            <form method="GET" class="form-inline">
-                <select name="tahun" class="form-control rounded-pill" onchange="this.form.submit()">
-                    <?php
-            $tahunNow = date('Y');
-            for($t = $tahunNow; $t >= 2020; $t--):
-            ?>
-                    <option value="<?= $t ?>" <?= ($tahunAktif == $t) ? 'selected' : '' ?>>
-                        <?= $t ?>
-                    </option>
-                    <?php endfor; ?>
-                </select>
-            </form>
+            <div class="col-md-6 col-12 mb-2 mb-md-0">
+                <h4 class="font-weight-bold text-center text-md-left">
+                    📈 Grafik Siswa Sakit per Bulan
+                </h4>
+            </div>
+
+            <div class="col-md-6 col-12 text-center text-md-right">
+                <form method="GET" class="d-inline-block">
+                    <select name="tahun" class="form-control rounded-pill px-4" onchange="this.form.submit()">
+                        <?php
+                        $tahunNow = date('Y');
+                        for($t = $tahunNow; $t >= 2020; $t--):
+                        ?>
+                        <option value="<?= $t ?>" <?= ($tahunAktif == $t) ? 'selected' : '' ?>>
+                            Tahun <?= $t ?>
+                        </option>
+                        <?php endfor; ?>
+                    </select>
+                </form>
+            </div>
+
         </div>
 
         <!-- CARD CHART RESPONSIVE MODERN -->
@@ -317,88 +380,159 @@ $resultSeringSakit = $conn->query($querySeringSakit);
             </div>
         </div>
 
-        <!-- =========================
-         DASHBOARD SISWA SERING SAKIT
-        ========================= -->
-        <div class="card row mb-2 shadow-sm border-0">
-            <div class="card-body">
-                <h4 class="mb-3 font-weight-bold">📊 Siswa Yang Sering Sakit</h4>
 
+        <!-- =========================
+        DASHBOARD SISWA SERING SAKIT
+        ========================= -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+
+                <!-- HEADER RESPONSIVE -->
+                <div class="row align-items-center mb-4">
+
+                    <!-- Judul -->
+                    <div class="col-md-6 col-12 mb-3 mb-md-0">
+                        <h4 class="font-weight-bold text-center text-md-left mb-0">
+                            📊 Siswa Yang Sering Sakit
+                        </h4>
+                    </div>
+
+                    <!-- Badge Ringkasan -->
+                    <div class="col-md-6 col-12 text-center text-md-right">
+                        <span class="badge badge-pill badge-primary px-3 py-2 mr-2 mb-2">
+                            Bulan Ini: <?= $totalBulanIni ?>
+                        </span>
+
+                        <span class="badge badge-pill badge-success px-3 py-2 mb-2">
+                            Tahun Ini: <?= $totalTahunIni ?>
+                        </span>
+                    </div>
+
+                </div>
+
+                <!-- CARD RINGKASAN -->
+                <div class="row mb-4">
+
+                    <!-- Total Bulan Ini -->
+                    <div class="col-md-6 col-12 mb-3">
+                        <div class="card border-0 shadow-sm text-center h-100">
+                            <div class="card-body">
+                                <h6 class="text-muted mb-2">
+                                    Total Siswa Sakit Bulan Ini
+                                </h6>
+
+                                <h2 class="font-weight-bold text-primary mb-1">
+                                    <?= $totalBulanIni ?>
+                                </h2>
+
+                                <small class="text-muted">
+                                    <?= date('F Y') ?>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Tahun Ini -->
+                    <div class="col-md-6 col-12 mb-3">
+                        <div class="card border-0 shadow-sm text-center h-100">
+                            <div class="card-body">
+                                <h6 class="text-muted mb-2">
+                                    Total Siswa Sakit Tahun Ini
+                                </h6>
+
+                                <h2 class="font-weight-bold text-success mb-1">
+                                    <?= $totalTahunIni ?>
+                                </h2>
+
+                                <small class="text-muted">
+                                    Tahun <?= $tahunSekarang ?>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- TABLE RESPONSIVE -->
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped text-center">
+                    <table class="table table-bordered table-striped text-center mb-0">
                         <thead class="thead-light">
                             <tr>
                                 <th>No</th>
                                 <th>NIS</th>
                                 <th>Nama</th>
                                 <th>Kelas</th>
-                                <!-- <th>Alamat</th> -->
                                 <th>Jumlah Sakit</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php 
-                        // $no = 1;
-                        $no = $startSering + 1;
-                        if ($resultSeringSakit->num_rows > 0):
-                            while ($row = $resultSeringSakit->fetch_assoc()):
-                        ?>
+                    $no = $startSering + 1;
+                    if ($resultSeringSakit->num_rows > 0):
+                        while ($row = $resultSeringSakit->fetch_assoc()):
+                    ?>
                             <tr>
                                 <td><?= $no++ ?></td>
                                 <td><?= $row['nis'] ?></td>
                                 <td><?= $row['nama'] ?></td>
                                 <td><?= $row['kelas'] ?></td>
-                                <!-- <td><?= $row['alamat'] ?? '-' ?></td> -->
                                 <td>
                                     <?php if ($row['jumlah_sakit'] >= 5): ?>
-                                    <span class="badge badge-danger px-3 py-2" style="border-radius: 30px;">
+                                    <span class="badge badge-danger px-3 py-2 rounded-pill">
                                         <?= $row['jumlah_sakit'] ?>
                                     </span>
                                     <?php else: ?>
-                                    <span class="badge badge-primary px-3 py-2" style="border-radius: 30px;">
+                                    <span class="badge badge-primary px-3 py-2 rounded-pill">
                                         <?= $row['jumlah_sakit'] ?>
                                     </span>
                                     <?php endif; ?>
                                 </td>
                             </tr>
                             <?php 
-                            endwhile;
-                        else:
-                        ?>
+                        endwhile;
+                    else:
+                    ?>
                             <tr>
-                                <td colspan="6">Belum ada data</td>
+                                <td colspan="5">Belum ada data</td>
                             </tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
-
-                    <!-- PAGINATION -->
-                    <nav>
-                        <!-- <ul class="pagination justify-content-center mt-3"> -->
-                        <ul class="pagination justify-content-center mt-3 pagination-sm">
-
-                            <!-- Previous -->
-                            <li class="page-item <?= ($pageSering <= 1) ? 'disabled' : '' ?>">
-                                <a class="page-link" href="?page_sering=<?= $pageSering - 1 ?>">❮</a>
-                            </li>
-
-                            <?php for ($i = 1; $i <= $totalPagesSering; $i++): ?>
-                            <li class="page-item <?= ($i == $pageSering) ? 'active' : '' ?>">
-                                <a class="page-link" href="?page_sering=<?= $i ?>">
-                                    <?= $i ?>
-                                </a>
-                            </li>
-                            <?php endfor; ?>
-
-                            <!-- Next -->
-                            <li class="page-item <?= ($pageSering >= $totalPagesSering) ? 'disabled' : '' ?>">
-                                <a class="page-link" href="?page_sering=<?= $pageSering + 1 ?>">❯</a>
-                            </li>
-
-                        </ul>
-                    </nav>
-
                 </div>
+
+                <!-- PAGINATION -->
+                <nav class="mt-4">
+                    <ul class="pagination justify-content-center pagination-sm flex-wrap">
+
+                        <!-- Previous -->
+                        <li class="page-item <?= ($pageSering <= 1) ? 'disabled' : '' ?>">
+                            <a class="page-link rounded-pill"
+                                href="?tahun=<?= $tahunAktif ?>&page_sering=<?= $pageSering - 1 ?>">
+                                ❮
+                            </a>
+                        </li>
+
+                        <!-- Nomor Halaman -->
+                        <?php for ($i = 1; $i <= $totalPagesSering; $i++): ?>
+                        <li class="page-item <?= ($i == $pageSering) ? 'active' : '' ?>">
+                            <a class="page-link rounded-pill mx-1"
+                                href="?tahun=<?= $tahunAktif ?>&page_sering=<?= $i ?>">
+                                <?= $i ?>
+                            </a>
+                        </li>
+                        <?php endfor; ?>
+
+                        <!-- Next -->
+                        <li class="page-item <?= ($pageSering >= $totalPagesSering) ? 'disabled' : '' ?>">
+                            <a class="page-link rounded-pill"
+                                href="?tahun=<?= $tahunAktif ?>&page_sering=<?= $pageSering + 1 ?>">
+                                ❯
+                            </a>
+                        </li>
+
+                    </ul>
+                </nav>
+
             </div>
         </div>
     </div>
@@ -457,8 +591,19 @@ $resultSeringSakit = $conn->query($querySeringSakit);
     const allLabels = <?= json_encode($namaBulan); ?>;
     const allData = <?= json_encode($jumlahChart); ?>;
 
-    let startIndex = 0;
     const itemsPerPage = 3;
+
+    // Bulan sekarang
+    const currentMonth = new Date().getMonth();
+
+    // Fokus awal: 2 bulan sebelum bulan sekarang
+    let startIndex = currentMonth - 2;
+    if (startIndex < 0) startIndex = 0;
+
+    // Batasi supaya tidak lewat Desember
+    if (startIndex > allLabels.length - itemsPerPage) {
+        startIndex = allLabels.length - itemsPerPage;
+    }
 
     const ctx = document.getElementById('chartSakitBulanan').getContext('2d');
 
@@ -495,16 +640,18 @@ $resultSeringSakit = $conn->query($querySeringSakit);
         chart.update();
     }
 
+    // NEXT = maju 1 bulan
     function nextChart() {
-        if (startIndex + itemsPerPage < allLabels.length) {
-            startIndex += itemsPerPage;
+        if (startIndex < allLabels.length - itemsPerPage) {
+            startIndex++;
             updateChart();
         }
     }
 
+    // PREV = mundur 1 bulan
     function prevChart() {
-        if (startIndex - itemsPerPage >= 0) {
-            startIndex -= itemsPerPage;
+        if (startIndex > 0) {
+            startIndex--;
             updateChart();
         }
     }

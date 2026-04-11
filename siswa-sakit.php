@@ -349,7 +349,7 @@ function tanggalIndonesia($tanggal) {
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
 
-                    <div class="modal-body" id="printArea">
+                    <div class="modal-body" id="printArea" style="text-align: center;">
 
                         <!-- Tambahkan ini supaya table bisa scroll di HP -->
                         <div class="table-responsive">
@@ -408,9 +408,9 @@ function tanggalIndonesia($tanggal) {
                             <i class="fas fa-print"></i> Cetak
                         </button>
 
-                        <button class="btn btn-secondary rounded-pill" data-dismiss="modal">
+                        <!-- <button class="btn btn-secondary rounded-pill" data-dismiss="modal">
                             <i class="fas fa-times"></i> Tutup
-                        </button>
+                        </button> -->
                     </div>
 
                 </div>
@@ -486,56 +486,312 @@ function tanggalIndonesia($tanggal) {
     <script>
     function printModal() {
 
-        var printContents = document.getElementById('printArea').innerHTML;
-        var printWindow = window.open('', '', 'height=700,width=900');
+        var nis = $("#d_nis").text();
+        var nama = $("#d_nama").text();
+        var kelas = $("#d_kelas").text();
+        var tanggal = $("#d_tanggal").text();
+        var jam = $("#d_jam").text();
+        var tekanan = $("#d_tekanan").text();
+        var suhu = $("#d_suhu").text();
+        var keluhan = $("#d_keluhan").text();
+        var diagnosa = $("#d_diagnosa").text();
+        var penanganan = $("#d_penanganan").text();
+        var petugas = $("#d_petugas").text();
 
+        var printWindow = window.open('', '', 'height=900,width=1000');
         var logoPath = "<?= $logoURL ?>";
 
         printWindow.document.write(`
-        <html>
-        <head>
-            <title>Print Detail Data Siswa</title>
-            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-            
-            <!-- Google Font Poppins -->
-            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-            <style>
-                body { padding: 40px; font-family: Poppins; }
-                .header {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    position: relative;
-                    margin-bottom: 30px;
-                }
-                .logo { position: absolute; left: 0; }
-                .logo img { width: 60px; }
-                .title {
-                    text-align: center;
-                    font-size: 22px;
-                    font-weight: bold;
-                }
-                table { width: 100%; }
-                th { width: 30%; }
-            </style>
-        </head>
-        <body>
+    <html>
+    <head>
+        <title>Hasil Pemeriksaan UKS</title>
 
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+        <style>
+            body{
+                font-family:'Poppins',sans-serif;
+                padding:40px;
+                color:#222;
+                font-size:14px;
+            }
+
+            .report-container{
+                max-width:900px;
+                margin:auto;
+            }
+
+            /* HEADER */
+            .header{
+                border-bottom:3px solid #222;
+                padding-bottom:20px;
+                margin-bottom:30px;
+                display:flex;
+                align-items:center;
+                justify-content:space-between;
+            }
+
+            .header-left{
+                display:flex;
+                align-items:center;
+            }
+
+            .logo img{
+                width:70px;
+                margin-right:20px;
+            }
+
+            .school-info h2{
+                margin:0;
+                font-size:22px;
+                font-weight:700;
+            }
+
+            .school-info p{
+                margin:0;
+                font-size:13px;
+            }
+
+            .report-code{
+                text-align:right;
+                font-size:13px;
+            }
+
+            .report-title{
+                text-align:center;
+                margin-bottom:30px;
+            }
+
+            .report-title h3{
+                margin:0;
+                font-weight:700;
+                font-size:20px;
+                letter-spacing:1px;
+            }
+
+            .report-title p{
+                margin-top:6px;
+                font-size:13px;
+                color:#666;
+            }
+
+            /* INFO SECTION LIKE INVOICE */
+            .invoice-box{
+                display:flex;
+                justify-content:space-between;
+                margin-bottom:30px;
+                gap:30px;
+            }
+
+            .info-card{
+                flex:1;
+                border:1px solid #ddd;
+                padding:18px;
+                border-radius:8px;
+                background:#fafafa;
+            }
+
+            .info-card h5{
+                font-size:14px;
+                font-weight:700;
+                margin-bottom:15px;
+                text-transform:uppercase;
+                color:#555;
+            }
+
+            .info-line{
+                display:flex;
+                margin-bottom:8px;
+            }
+
+            .info-label{
+                width:120px;
+                font-weight:600;
+                color:#444;
+            }
+
+            .info-value{
+                flex:1;
+            }
+
+            /* MEDICAL TABLE */
+            .medical-table{
+                width:100%;
+                border-collapse:collapse;
+                margin-top:10px;
+            }
+
+            .medical-table th{
+                background:#f4f4f4;
+                border:1px solid #ccc;
+                padding:12px;
+                text-align:left;
+                font-size:14px;
+            }
+
+            .medical-table td{
+                border:1px solid #ccc;
+                padding:12px;
+                vertical-align:top;
+            }
+
+            /* SIGNATURE */
+            .signature-section{
+                margin-top:70px;
+                display:flex;
+                justify-content:flex-end;
+            }
+
+            .signature-box{
+                width:250px;
+                text-align:center;
+            }
+
+            .signature-space{
+                height:80px;
+            }
+
+            .signature-name{
+                font-weight:700;
+                border-top:1px solid #000;
+                display:inline-block;
+                padding-top:8px;
+                min-width:180px;
+            }
+
+            .footer-note{
+                margin-top:50px;
+                font-size:12px;
+                color:#666;
+                text-align:center;
+                border-top:1px dashed #ccc;
+                padding-top:15px;
+            }
+
+            @media print{
+                body{
+                    padding:20px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="report-container">
+
+            <!-- HEADER -->
             <div class="header">
-                
+                <div class="header-left">
                     <div class="logo">
                         <img src="${logoPath}">
                     </div>
-                    <div class="title">
-                        DATA SISWA SAKIT
+                    <div class="school-info">
+                        <h2>UNIT KESEHATAN SEKOLAH (UKS)</h2>
+                        <p>Laporan Pemeriksaan Kesehatan Siswa</p>
                     </div>
-                
+                </div>
+
+                <div class="report-code">
+                    <strong>No. Dokumen:</strong><br>
+                    UKS-${nis}-${new Date().getFullYear()}
+                </div>
             </div>
 
-            ${printContents}
+            <!-- TITLE -->
+            <div class="report-title">
+                <h3>HASIL PEMERIKSAAN SISWA</h3>
+                <p>Dokumen Resmi Pemeriksaan Kesehatan</p>
+            </div>
 
-        </body>
-        </html>
+            <!-- INVOICE STYLE INFO -->
+            <div class="invoice-box">
+
+                <div class="info-card">
+                    <h5>Data Siswa</h5>
+
+                    <div class="info-line">
+                        <div class="info-label">NIS</div>
+                        <div class="info-value">: ${nis}</div>
+                    </div>
+
+                    <div class="info-line">
+                        <div class="info-label">Nama</div>
+                        <div class="info-value">: ${nama}</div>
+                    </div>
+
+                    <div class="info-line">
+                        <div class="info-label">Kelas</div>
+                        <div class="info-value">: ${kelas}</div>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <h5>Waktu Pemeriksaan</h5>
+
+                    <div class="info-line">
+                        <div class="info-label">Hari, Tanggal</div>
+                        <div class="info-value">: ${tanggal}</div>
+                    </div>
+
+                    <div class="info-line">
+                        <div class="info-label">Jam</div>
+                        <div class="info-value">: ${jam} WIB</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TABLE ONLY MEDICAL DATA -->
+            <table class="medical-table">
+                <thead>
+                    <tr>
+                        <th width="30%">Parameter Pemeriksaan</th>
+                        <th style="text-align: center">Hasil</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Tekanan Darah</td>
+                        <td>${tekanan}</td>
+                    </tr>
+                    <tr>
+                        <td>Suhu Tubuh</td>
+                        <td>${suhu}</td>
+                    </tr>
+                    <tr>
+                        <td>Keluhan</td>
+                        <td>${keluhan}</td>
+                    </tr>
+                    <tr>
+                        <td>Diagnosa</td>
+                        <td>${diagnosa}</td>
+                    </tr>
+                    <tr>
+                        <td>Penanganan</td>
+                        <td>${penanganan}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- SIGNATURE -->
+            <div class="signature-section">
+                <div class="signature-box">
+                    <p>Petugas Pemeriksa</p>
+                    <div class="signature-space"></div>
+                    <div class="signature-name">${petugas}</div>
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div class="footer-note">
+                Dokumen ini dicetak otomatis oleh Sistem Manajemen UKS SMA IHBS.
+            </div>
+
+        </div>
+
+    </body>
+    </html>
     `);
 
         printWindow.document.close();
