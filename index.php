@@ -339,8 +339,8 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
         </div>
 
         <!-- =========================
-GRAFIK SISWA SAKIT PER BULAN
-========================= -->
+        GRAFIK SISWA SAKIT PER BULAN
+        ========================= -->
         <div class="card shadow border-0 mb-4 rounded-lg">
 
             <div class="card-header bg-white border-0">
@@ -572,38 +572,10 @@ GRAFIK SISWA SAKIT PER BULAN
     }
     </script>
 
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script>
-    const ctx = document.getElementById('chartSakitBulanan').getContext('2d');
-
-    const chartSakitBulanan = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: <?= json_encode($bulanChart); ?>,
-            datasets: [{
-                label: 'Jumlah Siswa Sakit',
-                data: <?= json_encode($jumlahChart); ?>,
-                borderWidth: 2,
-                borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: true
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-    </script> -->
-
+    <!-- =========================
+    GRAFIK SISWA SAKIT PER BULAN
+    ========================= -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
