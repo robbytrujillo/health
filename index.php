@@ -146,14 +146,21 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
         border-radius: 30px !important;
     }
 
-    .chart-wrapper {
+    /* .chart-wrapper {
         position: relative;
         width: 100%;
         overflow-x: auto;
-    }
+    } */
 
     canvas {
         max-width: 100%;
+    }
+
+    .chart-wrapper {
+        position: relative;
+        overflow: hidden;
+        touch-action: pan-y;
+        cursor: grab;
     }
 
     @media (max-width: 768px) {
@@ -332,49 +339,61 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
         </div>
 
         <!-- =========================
-        GRAFIK SISWA SAKIT PER BULAN
-        ========================= -->
-        <div class="row align-items-center mb-4">
+GRAFIK SISWA SAKIT PER BULAN
+========================= -->
+        <div class="card shadow border-0 mb-4 rounded-lg">
 
-            <div class="col-md-6 col-12 mb-2 mb-md-0">
-                <h4 class="font-weight-bold text-center text-md-left">
-                    📈 Grafik Siswa Sakit per Bulan
-                </h4>
-            </div>
+            <div class="card-header bg-white border-0">
 
-            <div class="col-md-6 col-12 text-center text-md-right">
-                <form method="GET" class="d-inline-block">
-                    <select name="tahun" class="form-control rounded-pill px-4" onchange="this.form.submit()">
-                        <?php
+                <div class="row align-items-center">
+
+                    <div class="col-md-6 col-12 text-center text-md-left mb-2 mb-md-0">
+                        <h4 class="font-weight-bold mb-0">
+                            📈 Grafik Siswa Sakit per Bulan
+                        </h4>
+                    </div>
+
+                    <div class="col-md-6 col-12 text-center text-md-right">
+                        <form method="GET" class="d-inline-block">
+                            <select name="tahun" class="form-control rounded-pill px-4" onchange="this.form.submit()">
+
+                                <?php
                         $tahunNow = date('Y');
                         for($t = $tahunNow; $t >= 2020; $t--):
                         ?>
-                        <option value="<?= $t ?>" <?= ($tahunAktif == $t) ? 'selected' : '' ?>>
-                            Tahun <?= $t ?>
-                        </option>
-                        <?php endfor; ?>
-                    </select>
-                </form>
+                                <option value="<?= $t ?>" <?= ($tahunAktif == $t) ? 'selected' : '' ?>>
+                                    Tahun <?= $t ?>
+                                </option>
+                                <?php endfor; ?>
+
+                            </select>
+                        </form>
+                    </div>
+
+                </div>
             </div>
 
-        </div>
+            <div class="card-body text-center">
 
-        <!-- CARD CHART RESPONSIVE MODERN -->
-        <div class="card shadow-sm border-0 mb-4">
-            <div class="card-body">
+                <!-- Carousel Navigation -->
+                <div class="d-flex justify-content-center mb-3">
 
-                <div class="chart-navigation text-center mb-3">
-                    <button onclick="prevChart()" class="btn btn-outline-success rounded-pill btn-sm px-4 mr-2">
+                    <button onclick="prevChart()" class="btn btn-outline-success rounded-pill px-4 mr-2">
                         ◀ Prev
                     </button>
 
-                    <button onclick="nextChart()" class="btn btn-outline-success rounded-pill btn-sm px-4">
+                    <button onclick="nextChart()" class="btn btn-outline-success rounded-pill px-4">
                         Next ▶
                     </button>
+
                 </div>
 
+                <!-- Slide Title -->
+                <h5 id="slideTitle" class="font-weight-bold mb-3 text-success"></h5>
+
+                <!-- Chart -->
                 <div class="chart-wrapper">
-                    <canvas id="chartSakitBulanan"></canvas>
+                    <canvas id="chartSakitBulanan" height="120"></canvas>
                 </div>
 
             </div>
@@ -591,36 +610,28 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
     const allLabels = <?= json_encode($namaBulan); ?>;
     const allData = <?= json_encode($jumlahChart); ?>;
 
-    const itemsPerPage = 3;
-
-    // Bulan sekarang
-    const currentMonth = new Date().getMonth();
-
-    // Fokus awal: 2 bulan sebelum bulan sekarang
-    let startIndex = currentMonth - 2;
-    if (startIndex < 0) startIndex = 0;
-
-    // Batasi supaya tidak lewat Desember
-    if (startIndex > allLabels.length - itemsPerPage) {
-        startIndex = allLabels.length - itemsPerPage;
-    }
+    const itemsPerSlide = 3;
+    let startIndex = 0;
 
     const ctx = document.getElementById('chartSakitBulanan').getContext('2d');
 
     let chart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: allLabels.slice(startIndex, startIndex + itemsPerPage),
+            labels: [],
             datasets: [{
                 label: 'Jumlah Siswa Sakit',
-                data: allData.slice(startIndex, startIndex + itemsPerPage),
+                data: [],
                 borderWidth: 2,
-                borderRadius: 10
+                borderRadius: 12
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: {
+                duration: 500
+            },
             plugins: {
                 legend: {
                     display: true
@@ -635,24 +646,63 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
     });
 
     function updateChart() {
-        chart.data.labels = allLabels.slice(startIndex, startIndex + itemsPerPage);
-        chart.data.datasets[0].data = allData.slice(startIndex, startIndex + itemsPerPage);
+        let endIndex = startIndex + itemsPerSlide;
+
+        chart.data.labels = allLabels.slice(startIndex, endIndex);
+        chart.data.datasets[0].data = allData.slice(startIndex, endIndex);
         chart.update();
+
+        document.getElementById("slideTitle").innerHTML =
+            allLabels[startIndex] + " - " + allLabels[endIndex - 1];
     }
 
-    // NEXT = maju 1 bulan
     function nextChart() {
-        if (startIndex < allLabels.length - itemsPerPage) {
-            startIndex++;
+        if (startIndex + itemsPerSlide < allLabels.length) {
+            startIndex += itemsPerSlide;
             updateChart();
         }
     }
 
-    // PREV = mundur 1 bulan
     function prevChart() {
-        if (startIndex > 0) {
-            startIndex--;
+        if (startIndex - itemsPerSlide >= 0) {
+            startIndex -= itemsPerSlide;
             updateChart();
+        }
+    }
+
+    const currentMonth = new Date().getMonth();
+    startIndex = Math.floor(currentMonth / 3) * 3;
+    updateChart();
+
+
+    // ==========================
+    // SWIPE TOUCH MOBILE
+    // ==========================
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    const swipeArea = document.getElementById("chartSwipeArea");
+
+    swipeArea.addEventListener("touchstart", function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    swipeArea.addEventListener("touchend", function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipeGesture();
+    }, false);
+
+    function handleSwipeGesture() {
+        let swipeDistance = touchStartX - touchEndX;
+
+        if (swipeDistance > 50) {
+            // swipe kiri
+            nextChart();
+        }
+
+        if (swipeDistance < -50) {
+            // swipe kanan
+            prevChart();
         }
     }
     </script>
