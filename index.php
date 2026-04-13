@@ -598,38 +598,6 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
     }
     </script>
 
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <script>
-    const ctx = document.getElementById('chartSakitBulanan').getContext('2d');
-
-    const chartSakitBulanan = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: <?= json_encode($bulanChart); ?>,
-            datasets: [{
-                label: 'Jumlah Siswa Sakit',
-                data: <?= json_encode($jumlahChart); ?>,
-                borderWidth: 2,
-                borderRadius: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: true
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-    </script> -->
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
@@ -701,7 +669,6 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
         }
     }
     </script>
-
 </body>
 
 </html>
