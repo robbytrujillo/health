@@ -3,6 +3,16 @@ session_start();
 require 'config.php';
 require 'phpqrcode/qrlib.php';
 
+// echo "<pre>";
+// print_r($conn->query("
+// SELECT id_sakit, nis, nama, kelas, tgl_sakit
+// FROM tb_sakit
+// WHERE nama LIKE '%Sholihin%'
+// ORDER BY tgl_sakit DESC
+// ")->fetch_all(MYSQLI_ASSOC));
+// echo "</pre>";
+// exit;
+
 /* ===============================
    GRAFIK SISWA SAKIT PER BULAN
 ================================= */
@@ -54,22 +64,55 @@ $pageSering = isset($_GET['page_sering']) ? (int)$_GET['page_sering'] : 1;
 $startSering = ($pageSering - 1) * $limit;
 
 // Hitung total data
+// $countQuery = "SELECT COUNT(*) as total FROM (
+//     SELECT nis FROM tb_sakit 
+//     GROUP BY nis 
+//     HAVING COUNT(*) >= 1
+// ) as total_data";
+
 $countQuery = "SELECT COUNT(*) as total FROM (
-    SELECT nis FROM tb_sakit 
-    GROUP BY nis 
-    HAVING COUNT(*) >= 1
+    SELECT nis, nama, kelas 
+    FROM tb_sakit 
+    GROUP BY nis, nama, kelas
 ) as total_data";
+
+
 
 $countResult = $conn->query($countQuery);
 $totalDataSering = $countResult->fetch_assoc()['total'];
 $totalPagesSering = ceil($totalDataSering / $limit);
 
 // Query utama dengan LIMIT
+
+// $querySeringSakit = "
+//     SELECT nis, nama, kelas, COUNT(*) as jumlah_sakit
+//     FROM tb_sakit
+//     GROUP BY nis
+//     ORDER BY jumlah_sakit DESC
+//     LIMIT $startSering, $limit
+// ";
+
+// $querySeringSakit = "
+//     SELECT 
+//         nis,
+//         nama,
+//         kelas,
+//         COUNT(DISTINCT tgl_sakit) as jumlah_sakit
+//     FROM tb_sakit
+//     GROUP BY nis, nama, kelas
+//     ORDER BY jumlah_sakit DESC
+//     LIMIT $startSering, $limit
+// ";
+
 $querySeringSakit = "
-    SELECT nis, nama, kelas, COUNT(*) as jumlah_sakit
+    SELECT 
+        nis,
+        nama,
+        kelas,
+        COUNT(*) as jumlah_sakit
     FROM tb_sakit
-    GROUP BY nis
-    ORDER BY jumlah_sakit DESC
+    GROUP BY nis, nama, kelas
+    ORDER BY jumlah_sakit DESC, nama ASC
     LIMIT $startSering, $limit
 ";
 
@@ -146,21 +189,14 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
         border-radius: 30px !important;
     }
 
-    /* .chart-wrapper {
+    .chart-wrapper {
         position: relative;
         width: 100%;
         overflow-x: auto;
-    } */
+    }
 
     canvas {
         max-width: 100%;
-    }
-
-    .chart-wrapper {
-        position: relative;
-        overflow: hidden;
-        touch-action: pan-y;
-        cursor: grab;
     }
 
     @media (max-width: 768px) {
@@ -341,59 +377,48 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
         <!-- =========================
         GRAFIK SISWA SAKIT PER BULAN
         ========================= -->
-        <div class="card shadow border-0 mb-4 rounded-lg">
+        <div class="row align-items-center mb-4">
 
-            <div class="card-header bg-white border-0">
+            <div class="col-md-6 col-12 mb-2 mb-md-0">
+                <h4 class="font-weight-bold text-center text-md-left">
+                    <!--📈 Grafik Siswa Sakit-->
+                    Grafik Siswa Sakit
+                </h4>
+            </div>
 
-                <div class="row align-items-center">
-
-                    <div class="col-md-6 col-12 text-center text-md-left mb-2 mb-md-0">
-                        <h4 class="font-weight-bold mb-0">
-                            📈 Grafik Siswa Sakit per Bulan
-                        </h4>
-                    </div>
-
-                    <div class="col-md-6 col-12 text-center text-md-right">
-                        <form method="GET" class="d-inline-block">
-                            <select name="tahun" class="form-control rounded-pill px-4" onchange="this.form.submit()">
-
-                                <?php
+            <div class="col-md-6 col-12 text-center text-md-right">
+                <form method="GET" class="d-inline-block">
+                    <select name="tahun" class="form-control rounded-pill px-4" onchange="this.form.submit()">
+                        <?php
                         $tahunNow = date('Y');
                         for($t = $tahunNow; $t >= 2020; $t--):
                         ?>
-                                <option value="<?= $t ?>" <?= ($tahunAktif == $t) ? 'selected' : '' ?>>
-                                    Tahun <?= $t ?>
-                                </option>
-                                <?php endfor; ?>
-
-                            </select>
-                        </form>
-                    </div>
-
-                </div>
+                        <option value="<?= $t ?>" <?= ($tahunAktif == $t) ? 'selected' : '' ?>>
+                            Tahun <?= $t ?>
+                        </option>
+                        <?php endfor; ?>
+                    </select>
+                </form>
             </div>
 
-            <div class="card-body text-center">
+        </div>
 
-                <!-- Carousel Navigation -->
-                <div class="d-flex justify-content-center mb-3">
+        <!-- CARD CHART RESPONSIVE MODERN -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
 
-                    <button onclick="prevChart()" class="btn btn-outline-success rounded-pill px-4 mr-2">
+                <div class="chart-navigation text-center mb-3">
+                    <button onclick="prevChart()" class="btn btn-outline-success rounded-pill btn-sm px-4 mr-2">
                         ◀ Prev
                     </button>
 
-                    <button onclick="nextChart()" class="btn btn-outline-success rounded-pill px-4">
+                    <button onclick="nextChart()" class="btn btn-outline-success rounded-pill btn-sm px-4">
                         Next ▶
                     </button>
-
                 </div>
 
-                <!-- Slide Title -->
-                <h5 id="slideTitle" class="font-weight-bold mb-3 text-success"></h5>
-
-                <!-- Chart -->
                 <div class="chart-wrapper">
-                    <canvas id="chartSakitBulanan" height="120"></canvas>
+                    <canvas id="chartSakitBulanan"></canvas>
                 </div>
 
             </div>
@@ -412,7 +437,8 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
                     <!-- Judul -->
                     <div class="col-md-6 col-12 mb-3 mb-md-0">
                         <h4 class="font-weight-bold text-center text-md-left mb-0">
-                            📊 Siswa Yang Sering Sakit
+                            <!--📊 Siswa Yang Sering Sakit-->
+                            Siswa Yang Sering Sakit
                         </h4>
                     </div>
 
@@ -478,7 +504,7 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
                         <thead class="thead-light">
                             <tr>
                                 <th>No</th>
-                                <th>NIS</th>
+                                <!--<th>NIS</th>-->
                                 <th>Nama</th>
                                 <th>Kelas</th>
                                 <th>Jumlah Sakit</th>
@@ -492,7 +518,7 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
                     ?>
                             <tr>
                                 <td><?= $no++ ?></td>
-                                <td><?= $row['nis'] ?></td>
+                                <!--<td><?= $row['nis'] ?></td>-->
                                 <td><?= $row['nama'] ?></td>
                                 <td><?= $row['kelas'] ?></td>
                                 <td>
@@ -572,38 +598,74 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
     }
     </script>
 
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- =========================
-    GRAFIK SISWA SAKIT PER BULAN
-    ========================= -->
+    <script>
+    const ctx = document.getElementById('chartSakitBulanan').getContext('2d');
+
+    const chartSakitBulanan = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: <?= json_encode($bulanChart); ?>,
+            datasets: [{
+                label: 'Jumlah Siswa Sakit',
+                data: <?= json_encode($jumlahChart); ?>,
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+    </script> -->
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
     const allLabels = <?= json_encode($namaBulan); ?>;
     const allData = <?= json_encode($jumlahChart); ?>;
 
-    const itemsPerSlide = 3;
-    let startIndex = 0;
+    const itemsPerPage = 3;
+
+    // Bulan sekarang
+    const currentMonth = new Date().getMonth();
+
+    // Fokus awal: 2 bulan sebelum bulan sekarang
+    let startIndex = currentMonth - 2;
+    if (startIndex < 0) startIndex = 0;
+
+    // Batasi supaya tidak lewat Desember
+    if (startIndex > allLabels.length - itemsPerPage) {
+        startIndex = allLabels.length - itemsPerPage;
+    }
 
     const ctx = document.getElementById('chartSakitBulanan').getContext('2d');
 
     let chart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: [],
+            labels: allLabels.slice(startIndex, startIndex + itemsPerPage),
             datasets: [{
                 label: 'Jumlah Siswa Sakit',
-                data: [],
+                data: allData.slice(startIndex, startIndex + itemsPerPage),
                 borderWidth: 2,
-                borderRadius: 12
+                borderRadius: 10
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            animation: {
-                duration: 500
-            },
             plugins: {
                 legend: {
                     display: true
@@ -618,63 +680,24 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
     });
 
     function updateChart() {
-        let endIndex = startIndex + itemsPerSlide;
-
-        chart.data.labels = allLabels.slice(startIndex, endIndex);
-        chart.data.datasets[0].data = allData.slice(startIndex, endIndex);
+        chart.data.labels = allLabels.slice(startIndex, startIndex + itemsPerPage);
+        chart.data.datasets[0].data = allData.slice(startIndex, startIndex + itemsPerPage);
         chart.update();
-
-        document.getElementById("slideTitle").innerHTML =
-            allLabels[startIndex] + " - " + allLabels[endIndex - 1];
     }
 
+    // NEXT = maju 1 bulan
     function nextChart() {
-        if (startIndex + itemsPerSlide < allLabels.length) {
-            startIndex += itemsPerSlide;
+        if (startIndex < allLabels.length - itemsPerPage) {
+            startIndex++;
             updateChart();
         }
     }
 
+    // PREV = mundur 1 bulan
     function prevChart() {
-        if (startIndex - itemsPerSlide >= 0) {
-            startIndex -= itemsPerSlide;
+        if (startIndex > 0) {
+            startIndex--;
             updateChart();
-        }
-    }
-
-    const currentMonth = new Date().getMonth();
-    startIndex = Math.floor(currentMonth / 3) * 3;
-    updateChart();
-
-
-    // ==========================
-    // SWIPE TOUCH MOBILE
-    // ==========================
-    let touchStartX = 0;
-    let touchEndX = 0;
-
-    const swipeArea = document.getElementById("chartSwipeArea");
-
-    swipeArea.addEventListener("touchstart", function(e) {
-        touchStartX = e.changedTouches[0].screenX;
-    }, false);
-
-    swipeArea.addEventListener("touchend", function(e) {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipeGesture();
-    }, false);
-
-    function handleSwipeGesture() {
-        let swipeDistance = touchStartX - touchEndX;
-
-        if (swipeDistance > 50) {
-            // swipe kiri
-            nextChart();
-        }
-
-        if (swipeDistance < -50) {
-            // swipe kanan
-            prevChart();
         }
     }
     </script>
