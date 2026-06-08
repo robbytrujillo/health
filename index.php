@@ -558,14 +558,69 @@ $totalTahunIni = $conn->query($queryTahunIni)->fetch_assoc()['total_tahun'];
                         </li>
 
                         <!-- Nomor Halaman -->
-                        <?php for ($i = 1; $i <= $totalPagesSering; $i++): ?>
+                        <!-- <?php for ($i = 1; $i <= $totalPagesSering; $i++): ?>
                         <li class="page-item <?= ($i == $pageSering) ? 'active' : '' ?>">
                             <a class="page-link rounded-pill mx-1"
                                 href="?tahun=<?= $tahunAktif ?>&page_sering=<?= $i ?>">
                                 <?= $i ?>
                             </a>
                         </li>
-                        <?php endfor; ?>
+                        <?php endfor; ?> -->
+
+                        <?php
+
+                            $start = max(1, $pageSering - 2);
+                            $end   = min($totalPagesSering, $pageSering + 2);
+
+                            /* Halaman pertama */
+                            if ($start > 1) {
+                            ?>
+                        <li class="page-item <?= ($pageSering == 1) ? 'active' : '' ?>">
+                            <a class="page-link rounded-pill mx-1" href="?tahun=<?= $tahunAktif ?>&page_sering=1">1</a>
+                        </li>
+                        <?php
+
+                                if ($start > 2) {
+                            ?>
+                        <li class="page-item disabled">
+                            <span class="page-link border-0 bg-white">...</span>
+                        </li>
+                        <?php
+                                }
+                            }
+
+                            /* Halaman sekitar aktif */
+                            for ($i = $start; $i <= $end; $i++) {
+                            ?>
+                        <li class="page-item <?= ($i == $pageSering) ? 'active' : '' ?>">
+                            <a class="page-link rounded-pill mx-1"
+                                href="?tahun=<?= $tahunAktif ?>&page_sering=<?= $i ?>">
+                                <?= $i ?>
+                            </a>
+                        </li>
+                        <?php
+                            }
+
+                            /* Halaman terakhir */
+                            if ($end < $totalPagesSering) {
+
+                                if ($end < $totalPagesSering - 1) {
+                            ?>
+                        <li class="page-item disabled">
+                            <span class="page-link border-0 bg-white">...</span>
+                        </li>
+                        <?php
+                                }
+                            ?>
+                        <li class="page-item <?= ($pageSering == $totalPagesSering) ? 'active' : '' ?>">
+                            <a class="page-link rounded-pill mx-1"
+                                href="?tahun=<?= $tahunAktif ?>&page_sering=<?= $totalPagesSering ?>">
+                                <?= $totalPagesSering ?>
+                            </a>
+                        </li>
+                        <?php
+                            }
+                            ?>
 
                         <!-- Next -->
                         <li class="page-item <?= ($pageSering >= $totalPagesSering) ? 'disabled' : '' ?>">
